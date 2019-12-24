@@ -1,0 +1,4 @@
+#ignore large files:
+/yolov3_model.h5
+#ignore the data folders:
+/3d-object-detection-for-autonomous-vehicles/*
