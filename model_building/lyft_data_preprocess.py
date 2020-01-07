@@ -13,10 +13,9 @@ from typing import Tuple, List
 import cv2
 import matplotlib.pyplot as plt
 import sklearn.metrics
-<<<<<<< HEAD
+
 from sklearn.preprocessing import LabelEncoder
-=======
->>>>>>> cb6b869e2e493ef0b436209cc5cd3cef3c977e19
+
 from PIL import Image
 
 from matplotlib.axes import Axes
@@ -35,32 +34,31 @@ from lyft_dataset_sdk.lyftdataset import LyftDataset
 from lyft_dataset_sdk.utils.geometry_utils import view_points, box_in_image, BoxVisibility
 from lyft_dataset_sdk.utils.geometry_utils import view_points, transform_matrix
 from pathlib import Path
-<<<<<<< HEAD
-from keras.utils import to_categorical
-=======
 
->>>>>>> cb6b869e2e493ef0b436209cc5cd3cef3c977e19
+from keras.utils import to_categorical
+
+
+
 import struct
 from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Tuple, List, Dict
 import copy
 
-<<<<<<< HEAD
-input_path = '/media/brendanliu/1ffe4965-0a76-4845-aedc-1929d41a1cde/lyft_vis/3d-object-detection-for-autonomous-vehicles/'
+input_path = './3d-object-detection-for-autonomous-vehicles/'
 # train_csv = pd.read_csv(input_path+'train.csv')
 # sample_submission = pd.read_csv(input_path+'sample_submission.csv')
 # #Using the kaggle challenge description of the data.
 # column_names = ['sample_token', 'object_id', 'center_x', 'center_y',
 #                     'center_z', 'width', 'length', 'height', 'yaw','class_name']
-=======
-input_path = '../lyft_vis/3d-object-detection-for-autonomous-vehicles/'
+
+input_path = './3d-object-detection-for-autonomous-vehicles/'
 train_csv = pd.read_csv(input_path+'train.csv')
 sample_submission = pd.read_csv(input_path+'sample_submission.csv')
 #Using the kaggle challenge description of the data.
 column_names = ['sample_id', 'object_id', 'center_x', 'center_y',
                     'center_z', 'width', 'length', 'height', 'yaw','class_name']
->>>>>>> cb6b869e2e493ef0b436209cc5cd3cef3c977e19
+
 # objects = []
 # for sample_id, values in tqdm(train_csv.values[:]):
 #     data_params = values.split()
@@ -75,7 +73,7 @@ column_names = ['sample_id', 'object_id', 'center_x', 'center_y',
 # train_data[numerical_cols] = np.float32(train_data[numerical_cols].values)
 # train_data.to_csv(input_path+'train_dataframe.csv')
 
-<<<<<<< HEAD
+
 # def render_scene(index):
 #     my_scene = lyft_dataset.scene[index]
 #     my_sample_token = my_scene["first_sample_token"]

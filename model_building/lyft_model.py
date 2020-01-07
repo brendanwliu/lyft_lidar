@@ -317,18 +317,17 @@ def draw_boxes(filename, v_boxes, v_labels, v_scores):
     # show the plot
     pyplot.show()
 
-<<<<<<< HEAD
+
 # define the model
 model = make_yolov3_model()
 
 # load the model weights
 # I have loaded the pretrained weights in a separate dataset
-weight_reader = WeightReader('/media/brendanliu/1ffe4965-0a76-4845-aedc-1929d41a1cde/lyft_vis/3d-object-detection-for-autonomous-vehicles/yolov3.weights')
+weight_reader = WeightReader('./yolov3.weights')
 
 # set the model weights into the model
 weight_reader.load_weights(model)
 
 # save the model to file
-model.save('/media/brendanliu/1ffe4965-0a76-4845-aedc-1929d41a1cde/lyft_vis/yolov3_model.h5')
-=======
->>>>>>> cb6b869e2e493ef0b436209cc5cd3cef3c977e19
+model.save('./aux_files/yolov3_model.h5')
+
