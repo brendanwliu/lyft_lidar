@@ -6,3 +6,6 @@
 /images
 /lidar
 /maps
+#ignoring other artifacts
+/.vscode/
+/__pycache__/
