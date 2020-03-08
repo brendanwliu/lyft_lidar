@@ -7,5 +7,5 @@ images
 lidar
 maps
 #ignoring other artifacts
-.vscode/**
-__pycache__/**
+.vscode/
+__pycache__/
