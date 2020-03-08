@@ -106,3 +106,82 @@ This is an example of the lidar_top raw data visualized using lyft SDK's render_
 ![voxel transform sample](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/sample_processed_data.png)
 
 Above is an example of what the input for our network will look like. It's a top-down projection of the world around the car (the car faces to the right in the image). The height of the lidar points are separated into three bins, which visualized like this these are the RGB channels of the image.
+
+Now that we've created our inputs and targets, let's setup our model and train.
+
+## Training a UNet to Segment BEV Images
+
+First we explore the UNet model originally proposed by [Ronneberger et al](https://arxiv.org/pdf/1505.04597.pdf). 
+
+    "The main idea in the Unet is to supplement a usual contracting network by successive layers, where pooling operators are
+    replaced by upsampling operators.Hence, these layers increase the resolution of the output. In order to localize,
+    highresolution features from the contracting path are combined with the upsampled output. A successive convolution layer
+    can then learn to assemble a more preciseoutput based on this information." (Ronneberger et al., 2)
+
+This yields the u-shaped architechture:
+
+![UNet Model](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/UNetModel.png)
+
+However, as stated in the original paper, this network is supposed to be able to be trained on very few data points in the training set, which is beneficial for bio-medical applications due to lack of traning data. This CNN can be trained end to end to label at the pixel level, with each pixel being given a class label. The energy function is computed by a pixel-wise softmax overt the final feature map combined with the cross entropy loss function. We use the softmax activation function to predict the class of each pixel, interpretable as a probability:
+
+![softmax](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/softmax.png)
+
+Our softmax is maximized for a certian class k if pk(x) = 1 while all other pk(x) = 0. The crossentropy penalizes, at each pixel, the deviation of our softmax from 1:
+
+![crossentropy](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/crossentropy.png)
+
+There's still one more problem that needs to be addressed. A vast majority of the predicted objects will be background noise that are not the classes that we are interested in 
+
+    ["car", "motorcycle", "bus", "bicycle", "truck", "pedestrian", "other_vehicle", "animal", "emergency_vehicle"]
+
+Therefore we need a class for all these "background" objects, and we weight the loss for the "background" class to be lower than all other classes to account for the large class imbalance (with cars being vastly over represented).
+
+In the following, there are four different visualizations stacked on top of eachother:
+
+    1. The top images have two color channels: red for predictions, green for targets. Note that red+green=yellow. In other words:
+
+        Black: True Negative
+        Green: False Negative
+        Yellow: True Positive
+        Red: False Positive
+
+    2. The input image
+    3. The input image blended together with targets+predictions
+    4. The predictions thresholded at 0.5 probability.
+
+
+I trained the network on the lyft level5 data for 25 epochs and visualized the results of the first two samples at each epoch. At epoch 1 we can see that obviously the network has not trained for long enough and is really bad at segmenting objects with a mean error of 0.20.
+
+![first epoch](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/UNet_epoch_1_1.png)
+
+THe first image is the error between the predicted values and the ground truth, with red being false positives. We can also see that there seems to be no fourth image, thats because our net thinks everything is an object, causing the rediculous false positive rate.
+
+After 25 epochs, we can see that the model has converged more and the mean error is a lot less of 0.02:
+
+![25th epoch](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/UNet_epoch_25.png)
+
+We can see that the CNN can segment the image better, however we need to compute the mean average percent (mAP). You can read a succinct article about mAP ![here](https://towardsdatascience.com/breaking-down-mean-average-precision-map-ae462f623a52#1a59). At a IoU of 0.5, I was able to get an mAP of 0.20196 on average over all classes. I looked at the image with the highest validation loss:
+
+![high val loss](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/UNet_highest_val_loss.png)
+
+We can see for the majority of cars we can see that the network can see them, however, for the small cluster of green bicycles the UNet doesn't see it at all. There's also a problem with a ton of false positives, but this could be because the model has not converged yet. Though the mean error decreased per epoch, I don't believe that the model had converged yet.
+
+We can see that the network struggles to detect smaller objects and I plotted a specific example with a pedestrian in the environment. 
+
+![small obj](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/drawing_bounding_boxes.png)
+
+The small pedestrian we can see on the very right of the image in the target plot was not a predicted object by the UNet.I'm still trying to perform more analytics, like breaking down the mAP by class. I will update the readme once I'm done.
+
+Problems with the model:
+
+    1. Model performs badly on uncommon classes. This is what I assume is dragging down the overall mAP of our model
+    2. The boxes are super bad, because of our super coarse voxels
+    3. I didn't have money to train the model for longer so it can converge (it cost ~$35-$40 per training of my model)
+    4. We say that all objects can be broken down into three different height buckets, but this is inherently false as we can have cars that span more than one height 'bucket' and all objects are not at the height of the vehicle gathering the data.
+    5. We only use LiDAR data, with most state of the art CNN's using LiDAR in conjunction with camera data.
+
+## Future Work
+
+    1. Data augmentation - see what the effects of translating and deforming traning samples
+    2. Combining CNN's that use camera data and lidar data 
+    3. Exploring pseudo-bev mappings that only use camera data to make synthetic bev images
