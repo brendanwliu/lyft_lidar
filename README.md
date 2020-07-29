@@ -1,5 +1,8 @@
 # lyft_lidar
-An implementation of a UNet to solve a 3D lidar image problem.
+An implementation of a UNet to solve a 3D lidar image problem. This project is part of a project with the UCSB Data Science Club and is at this point 'complete'.
+
+## Final Comments Post-Project
+This was my first foray into utilizing CNNs in a real world problem, drawing on examples already in the deeplearning community. It was an interesting experience learning and understanding image segmentation and its implication on self driving cars. By no means is this a comprehensive experiment. I just wanted to acknowledge the help of the UCSB Data Science Club and the Statistics faculty for helping me gain interest in the world of computational statistics. 
 
 ## Abstract
 Self-driving cars are becoming less and less of a sci-fi dream every year. Each year over 42,000 people die of car accidents and over 2.7 million are injured. Being able to create a autonomous car that has never gets tired, makes objective decisions based on millions of hours of training data will improve safety in the long run. I trained a covolutional neural network (CNN) to segment birds eye view LiDAR images. Using the lyft level5 API I was able to get my annotated traning and validation datasets from lyft cars being driven around palo alto. My results are not fantastic;and, on the Kaggle leaderboard, I was able to score an abysmal 0.01 on the private held out data set, with the winner scoring a 0.216. However, the experiment still proves useful, because we can explore the segmentation results based on LiDAR data alone and compare it to the top scorers, which use a combination of image and LiDAR data.
@@ -109,6 +112,10 @@ Above is an example of what the input for our network will look like. It's a top
 
 Now that we've created our inputs and targets, let's setup our model and train.
 
+## Limitations - Technical and otherwise
+
+I want to take the time to explore the limitations of my experiment. Any batch size above 8 was too large to fit in memory, even downscaling the images in half. I also did not augment the data, as explained in the original UNet paper, was quintessential to the success of the architechture. The UNet also takes all samples as IID, which it is not. We know the data is temporal but do not take this into account. I was originally using a GCP instance with free education credit to do the computataion, however, I spent all the credit and did not have the money to continue. 
+
 ## Training a UNet to Segment BEV Images
 
 First we explore the UNet model originally proposed by [Ronneberger et al](https://arxiv.org/pdf/1505.04597.pdf). 
@@ -154,7 +161,7 @@ I trained the network on the lyft level5 data for 25 epochs and visualized the r
 
 ![first epoch](https://github.com/brendanwliu/lyft_lidar/blob/master/aux_files/images/UNet_epoch_1_1.png)
 
-THe first image is the error between the predicted values and the ground truth, with red being false positives. We can also see that there seems to be no fourth image, thats because our net thinks everything is an object, causing the rediculous false positive rate.
+The first image is the error between the predicted values and the ground truth, with red being false positives. We can also see that there seems to be no fourth image, thats because our net thinks everything is an object, causing the rediculous false positive rate.
 
 After 25 epochs, we can see that the model has converged more and the mean error is a lot less of 0.02:
 
@@ -185,3 +192,5 @@ Problems with the model:
     1. Data augmentation - see what the effects of translating and deforming traning samples
     2. Combining CNN's that use camera data and lidar data 
     3. Exploring pseudo-bev mappings that only use camera data to make synthetic bev images
+    
+Thank you for taking the time to read the learnings of a college senior! 
